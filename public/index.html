@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OddajTo - Rejestr Długów i Rozliczeń</title>
+  <meta name="description" content="Nowoczesna, przejrzysta i szybka aplikacja do kontrolowania rozliczeń i długów ze znajomymi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Górny Pasek Nawigacji -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="5" rx="3"></rect>
+            <line x1="2" x2="22" y1="10" y2="10"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 id="appTitle">OddajTo</h1>
+          <p id="appSubtitle">Proste rozliczenia i rejestr długów</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Wybór profilu "Kim jestem w rozliczeniach" -->
+        <div class="user-profile-badge">
+          <span class="user-profile-label" id="lblMyProfile">Kim jesteś:</span>
+          <div class="user-profile-select-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <select id="userProfileSelect" title="Wybierz swój profil, aby dashboard pokazywał Twoje bilanse" aria-label="Wybierz swój profil"></select>
+          </div>
+        </div>
+
+        <!-- Przełącznik Dark / Light Mode -->
+        <button type="button" id="themeToggleBtn" class="theme-toggle-btn" title="Przełącz motyw (Jasny / Ciemny)" aria-label="Przełącz motyw">
+          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Przełącznik języka -->
+        <div class="lang-switch" role="group" aria-label="Przełącznik języka">
+          <button type="button" class="lang-btn active" data-lang="pl">PL</button>
+          <button type="button" class="lang-btn" data-lang="en">EN</button>
+        </div>
+
+        <!-- Główny przycisk dodawania -->
+        <button id="openAddModalBtn" class="btn btn-primary btn-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span id="btnAddMainText">Nowe rozliczenie</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD: Kafelki Podsumowania -->
+    <section class="dashboard-section" aria-label="Pulpit podsumowania">
+      <div class="section-title-row">
+        <div class="section-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span id="lblDashboardBadge">PULPIT</span>
+        </div>
+        <div class="refresh-indicator">
+          <span class="pulse-dot"></span>
+          <span id="lblLiveStatus">Na bieżąco z bazą</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <!-- Karta 1: Łącznie aktywne -->
+        <div class="stat-card card-total">
+          <div class="stat-header">
+            <span class="stat-label" id="lblStatTotal">Wszystkie do spłaty</span>
+            <div class="stat-icon-wrap icon-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value" id="statTotalActive">0.00 zł</div>
+          <div class="stat-meta">
+            <span id="statActiveCount">0 aktywnych pozycji</span>
+          </div>
+        </div>
+
+        <!-- Karta 2: Ktoś wisi "Ja" (Do odebrania) -->
+        <div class="stat-card card-receive">
+          <div class="stat-header">
+            <span class="stat-label" id="lblStatReceive">Do odebrania dla Ciebie</span>
+            <div class="stat-icon-wrap icon-green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value text-green" id="statMyReceive">+0.00 zł</div>
+          <div class="stat-meta" id="statReceiveDesc">Wiszą dla Ciebie</div>
+        </div>
+
+        <!-- Karta 3: "Ja" wisi (Do oddania) -->
+        <div class="stat-card card-pay">
+          <div class="stat-header">
+            <span class="stat-label" id="lblStatPay">Do oddania przez Ciebie</span>
+            <div class="stat-icon-wrap icon-red">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                <polyline points="17 18 23 18 23 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value text-red" id="statMyPay">-0.00 zł</div>
+          <div class="stat-meta" id="statPayDesc">Ty wiszisz innym</div>
+        </div>
+
+        <!-- Karta 4: Rozliczone -->
+        <div class="stat-card card-settled">
+          <div class="stat-header">
+            <span class="stat-label" id="lblStatSettled">Rozliczone łącznie</span>
+            <div class="stat-icon-wrap icon-purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value text-purple" id="statSettledTotal">0.00 zł</div>
+          <div class="stat-meta">
+            <span id="statSettledCount">0 rozliczonych</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pasek Bilansów Osób - Kompaktowy Suwak Poziomy -->
+      <div class="people-card">
+        <div class="people-card-header">
+          <div class="people-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span id="lblPeopleTitle">Bilanse znajomych:</span>
+          </div>
+          
+          <div class="people-header-right">
+            <span class="people-hint" id="lblPeopleHint">Przewijaj w poziomie • Kliknij, aby filtrować</span>
+            <div class="people-scroll-controls">
+              <button type="button" id="btnScrollPeopleLeft" class="btn-scroll" title="Przewiń w lewo">&lsaquo;</button>
+              <button type="button" id="btnScrollPeopleRight" class="btn-scroll" title="Przewiń w prawo">&rsaquo;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="people-scroll-container" id="peopleScrollContainer">
+          <div id="peopleList" class="people-pills-row">
+            <!-- Generowane dynamicznie w jednym poziomym pasku -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GŁÓWNA LISTA ROZLICZEŃ -->
+    <main class="list-section">
+      <!-- Pasek narzędzi listy: Filtry, Wyszukiwarka, Filtr osoby -->
+      <div class="toolbar">
+        <div class="filter-tabs" role="tablist">
+          <button type="button" class="tab-btn active" data-filter="UNSETTLED" id="tabUnsettled">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="tabUnsettledText">Do oddania</span>
+          </button>
+          <button type="button" class="tab-btn" data-filter="SETTLED" id="tabSettled">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="tabSettledText">Rozliczone</span>
+          </button>
+          <button type="button" class="tab-btn" data-filter="ALL" id="tabAll">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <span id="tabAllText">Wszystkie</span>
+          </button>
+        </div>
+
+        <div class="toolbar-controls">
+          <div class="select-wrapper">
+            <svg class="select-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <select id="personFilter" class="person-select" aria-label="Filtruj wg osoby">
+              <option value="ALL" id="optAllPeople">Wszystkie osoby</option>
+            </select>
+          </div>
+
+          <div class="search-wrapper">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="filterSearch" placeholder="Szukaj osoby lub za co..." class="search-input" autocomplete="off">
+            <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Wyczyść wyszukiwanie" style="display: none;">&times;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nagłówek i Licznik -->
+      <div class="list-card">
+        <div class="list-card-header">
+          <div class="list-card-title">
+            <h2 id="lblListTitle">Lista rozliczeń</h2>
+            <span class="count-badge" id="debtsCount">0</span>
+          </div>
+
+          <div id="activeFilterTag" class="active-filter-tag" style="display: none;">
+            <span>Filtrowanie: <strong id="activeFilterName"></strong></span>
+            <button type="button" id="clearPersonFilterBtn" title="Usuń filtr osoby">&times;</button>
+          </div>
+        </div>
+
+        <!-- Kontener Listy -->
+        <div id="debtsList" class="debts-list">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p id="lblLoading">Ładowanie rozliczeń...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL POTWIERDZENIA (CUSTOM CONFIRM) -->
+  <!-- ======================================================== -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="modal-box modal-box-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge icon-badge-warning" id="confirmModalIconBadge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 id="confirmModalTitle">Potwierdzenie</h3>
+        </div>
+        <button type="button" class="modal-close" data-close="confirmModal" aria-label="Zamknij">&times;</button>
+      </div>
+
+      <div class="confirm-modal-body">
+        <p id="confirmModalMessage">Czy na pewno chcesz wykonać tę operację?</p>
+      </div>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-secondary" data-close="confirmModal" id="confirmModalCancelBtn">Anuluj</button>
+        <button type="button" class="btn btn-primary" id="confirmModalActionBtn">Potwierdź</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: NOWE ROZLICZENIE (Pojedynczy wpis vs Zrzutka) -->
+  <!-- ======================================================== -->
+  <div id="addModal" class="modal-overlay">
+    <div class="modal-box modal-box-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge icon-badge-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+          <h3 id="modalAddTitle">Nowe Rozliczenie</h3>
+        </div>
+        <button type="button" class="modal-close" data-close="addModal" aria-label="Zamknij">&times;</button>
+      </div>
+
+      <!-- Przełącznik trybu -->
+      <div class="modal-mode-tabs" role="tablist">
+        <button type="button" class="modal-mode-tab active" id="tabModeSingle" data-mode="single">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          <span id="tabModeSingleText">Pojedynczy dług</span>
+        </button>
+        <button type="button" class="modal-mode-tab" id="tabModeSplit" data-mode="split">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+          </svg>
+          <span id="tabModeSplitText">Podziel rachunek (Zrzutka)</span>
+        </button>
+      </div>
+
+      <!-- TRYB 1: POJEDYNCZY WPIS -->
+      <form id="addDebtForm" class="mode-form active" novalidate>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="debtorInput" id="lblFormDebtor">Kto wisi (Dłużnik):</label>
+            <div class="input-icon-wrap">
+              <input type="text" id="debtorInput" placeholder="np. Marek lub Ja" required autocomplete="off" list="peopleDatalist" maxlength="60">
+            </div>
+            <div class="field-error" id="debtorError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="creditorInput" id="lblFormCreditor">Komu wisi (Wierzyciel):</label>
+            <div class="input-icon-wrap">
+              <input type="text" id="creditorInput" placeholder="np. Ania lub Ja" required autocomplete="off" list="peopleDatalist" maxlength="60">
+            </div>
+            <div class="field-error" id="creditorError"></div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="debtAmount" id="lblFormAmount">Kwota:</label>
+            <input type="number" id="debtAmount" step="0.01" min="0.01" max="1000000000" placeholder="np. 50.00" required>
+            <div class="field-error" id="amountError"></div>
+          </div>
+          <div class="form-group">
+            <label for="debtCurrency" id="lblFormCurrency">Waluta:</label>
+            <select id="debtCurrency" aria-label="Wybór waluty">
+              <option value="PLN" selected>PLN (zł)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="CHF">CHF (fr)</option>
+              <option value="CZK">CZK (Kč)</option>
+              <option value="NOK">NOK (kr)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="debtTitle" id="lblFormReason">Za co (opcjonalnie):</label>
+          <input type="text" id="debtTitle" placeholder="np. Pizza, Paliwo, Bilet, Zakupy..." maxlength="150">
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" data-close="addModal" id="btnCancelAdd">Anuluj</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAdd">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="btnSubmitAddText">Zapisz rozliczenie</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- TRYB 2: PODZIEL RACHUNEK (SPLIT BILL) -->
+      <form id="splitBillForm" class="mode-form" novalidate>
+        <div class="form-group">
+          <label for="splitPayerInput" id="lblSplitPayer">Kto wyłożył całość (Płacący):</label>
+          <input type="text" id="splitPayerInput" placeholder="np. Ja lub Marek" required autocomplete="off" list="peopleDatalist" maxlength="60">
+          <div class="field-error" id="splitPayerError"></div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="splitTotalInput" id="lblSplitTotal">Całkowity rachunek:</label>
+            <input type="number" id="splitTotalInput" step="0.01" min="0.01" max="1000000000" placeholder="np. 120.00" required>
+            <div class="field-error" id="splitTotalError"></div>
+          </div>
+          <div class="form-group">
+            <label for="splitCurrency" id="lblSplitCurrency">Waluta:</label>
+            <select id="splitCurrency" aria-label="Wybór waluty">
+              <option value="PLN" selected>PLN (zł)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="CHF">CHF (fr)</option>
+              <option value="CZK">CZK (Kč)</option>
+              <option value="NOK">NOK (kr)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="splitTitleInput" id="lblSplitTitle">Za co (Tytuł):</label>
+          <input type="text" id="splitTitleInput" placeholder="np. Kolacja, Paliwo, Zakupy..." required maxlength="150">
+          <div class="field-error" id="splitTitleError"></div>
+        </div>
+
+        <!-- INTERAKTYWNY WYBÓR OSÓB W ZRZUTCE -->
+        <div class="form-group">
+          <label id="lblSplitPeople">Osoby biorące udział w podziale:</label>
+          
+          <!-- Pole dodawania nowej osoby -->
+          <div class="add-person-bar">
+            <input type="text" id="splitAddPersonInput" placeholder="Wpisz imię i wciśnij Enter lub Dodaj" autocomplete="off" list="peopleDatalist" maxlength="60">
+            <button type="button" id="splitAddPersonBtn" class="btn btn-add-chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span id="lblAddPersonBtn">Dodaj</span>
+            </button>
+          </div>
+          <div class="field-error" id="splitPeopleError"></div>
+
+          <!-- Szybkie podpowiedzi ze znajomych w bazie -->
+          <div class="quick-suggest-box" id="quickSuggestBox">
+            <span class="quick-suggest-title" id="lblQuickSuggest">Szybki wybór ze znajomych:</span>
+            <div id="splitQuickSuggestions" class="quick-suggest-pills">
+              <!-- Generowane dynamicznie -->
+            </div>
+          </div>
+
+          <!-- Lista wybranych osób z przyciskami usuwania -->
+          <div class="selected-people-box">
+            <div class="selected-people-header">
+              <span id="lblSelectedPeopleTitle">Wybrane osoby (<strong id="splitPeopleCount">0</strong>):</span>
+              <button type="button" id="splitClearAllPeopleBtn" class="btn-link-clear" style="display: none;">Wyczyść wszystkich</button>
+            </div>
+            <div id="splitSelectedPeopleList" class="selected-people-chips">
+              <!-- Wybrane osoby z przyciskiem X -->
+            </div>
+          </div>
+        </div>
+
+        <div class="form-checkbox">
+          <label for="splitIncludePayer">
+            <input type="checkbox" id="splitIncludePayer" checked>
+            <span id="lblSplitIncludePayer">Wlicz płacącego w podział (rachunek dzieli się też na mnie)</span>
+          </label>
+        </div>
+
+        <!-- Podgląd wyliczenia na żywo -->
+        <div class="split-preview-card" id="splitPreviewBox">
+          <div class="preview-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <div id="splitPreviewText">Wpisz kwotę i osoby, aby zobaczyć podział...</div>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" data-close="addModal" id="btnCancelSplit">Anuluj</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitSplit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+            <span id="btnSubmitSplitText">Podziel i zapisz</span>
+          </button>
+        </div>
+      </form>
+
+      <datalist id="peopleDatalist"></datalist>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: SPŁAĆ CZĘŚĆ -->
+  <!-- ======================================================== -->
+  <div id="payPartialModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge icon-badge-blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-1.8-1"></path>
+              <path d="M12 6v2m0 8v2"></path>
+            </svg>
+          </div>
+          <h3 id="modalPayTitle">Częściowa Spłata</h3>
+        </div>
+        <button type="button" class="modal-close" data-close="payPartialModal" aria-label="Zamknij">&times;</button>
+      </div>
+
+      <div id="payPartialInfo" class="modal-info-box"></div>
+
+      <form id="payPartialForm" novalidate>
+        <input type="hidden" id="payPartialDebtId">
+        <div class="form-group">
+          <label for="payPartialAmountInput" id="lblPartialAmount">Kwota wpłaty:</label>
+          <input type="number" id="payPartialAmountInput" step="0.01" min="0.01" placeholder="np. 20.00" required>
+          <div class="field-error" id="payPartialError"></div>
+        </div>
+
+        <!-- Szybkie przyciski procentowe -->
+        <div class="quick-pay-chips">
+          <button type="button" class="chip-btn" data-ratio="0.25">25%</button>
+          <button type="button" class="chip-btn" data-ratio="0.5">50%</button>
+          <button type="button" class="chip-btn" data-ratio="0.75">75%</button>
+          <button type="button" class="chip-btn" data-ratio="1.0">100%</button>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" data-close="payPartialModal" id="btnCancelPartial">Anuluj</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitPartial">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="btnSubmitPartialText">Zatwierdź wpłatę</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: HISTORIA SPŁAT -->
+  <!-- ======================================================== -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge icon-badge-gray">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+          </div>
+          <h3 id="modalHistoryTitle">Historia Spłat</h3>
+        </div>
+        <button type="button" class="modal-close" data-close="historyModal" aria-label="Zamknij">&times;</button>
+      </div>
+
+      <div id="historyModalInfo" class="modal-info-box"></div>
+
+      <div class="history-container">
+        <h4 id="lblHistorySubtitle" class="history-subtitle">Zarejestrowane wpłaty:</h4>
+        <div id="historyPaymentsList" class="history-list">
+          <!-- Generowane dynamicznie -->
+        </div>
+      </div>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-secondary" data-close="historyModal" id="btnCloseHistory">Zamknij</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
